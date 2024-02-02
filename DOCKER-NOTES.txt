@@ -1,0 +1,140 @@
+
+docker## Docker Basics (example)
+
+References:
+https://docs.docker.com/engine/reference/commandline/container_run/
+https://www.youtube.com/watch?v=MYjVOJYal7Y (Some code errors and references need updating, but good overall presentation)
+https://www.youtube.com/watch?v=BfzpN6drbJc  (Running container on windows)
+### Docker Images
+Containers are made from Images
+
+```
+docker image ls
+docker image rm user/imageName
+```
+
+### Docker Containers
+Docker containers are built from an existing image. If an image is not found locally, docker will search the library for a public image.
+Multiple instances of a container can be running at the same time, but must have unique names.
+
+```
+docker container ls
+docker container ls -all
+docker container stop containerName
+docker container start containerName
+docker container rm containerName
+```
+
+### Build Image and Run Containers
+
+```
+#Build a new image under the username 'user'
+docker build . -t user/imageName
+
+# Run a new container named 'containerName' on port 3000 (public) using the image above
+# '-d' means run in background, omit to see log output in console
+docker run -d --name=containerName -p=3000:80 user/imageName  
+```
+
+
+### Docker File
+
+A file named 'Dockerfile' must be found in the home directory of the source code for each project.
+A 'requirements.txt' file should define all required dependencies.
+
+Typical Example:
+
+```
+FROM python:3
+WORKDIR /home/Docker/front
+COPY requirements.txt ./
+RUN pip install -r requirements.txt
+COPY . .
+EXPOSE 2000
+CMD ["python", "./app.py"]
+```
+
+
+
+## Docker Compose (Launch a network of containers)
+
+References:
+https://www.youtube.com/watch?v=HG6yIjZapSA
+
+```
+# Build the project found in the working directoy
+docker-compose build
+
+# Run an already built docker compose project
+# '-d' means run in background, omit to see log output in console
+docker-compose up -d  
+
+# Shut down and remove containers
+docker-compose down
+# BETTER OPTION WHICH REMOVES ORPHAN IMAGES
+docker-compose down --rmi all -v --remove-orphans
+```
+
+### Docker Compose File
+
+A file named 'docker-compose.yml' is required to build a Docker Compose project. This should be found in the root folder containing all applications to be launched, or a path defined.
+IMPORTANT: Ensure version number used is compatible with 'docker-compose --version' installed.
+Note: Port mapping on left is public on the host machine, port mapping on right is from the container used (port defined by app launched).
+		Services are named by the top level name, in this case 'web' and 'api'. These are accessible to each other via "http://web:80" or "http://api:3000" within the code, notice the database env variable.
+
+```
+version: "3.8"
+services:
+    web:
+        build: ./front
+        ports:
+            - 80:2000
+        environment:
+            DB_URL: http://api:3000
+    api:
+        build: ./rp_flask_api
+        ports:
+            - 3000:3000
+```
+
+
+## Install phpmyadmin with mysql
+
+Reference: https://blog.thenets.org/how-to-install-mysql-and-phpmyadmin-with-docker/
+
+## SSH Commands for Setup
+
+Step 1: Create a new docker network named 'asgard' (or anything you want)
+
+```
+docker network create asgard
+```
+
+Step 2: Run command to build mysql database container.
+		- Replace with network name from step 1
+		- Root Password can be changed by updating the parameter below (Username will be 'root')
+		- Port mapping must be an unused port
+		- Directory on left must map to a directly that exits and is accessible to the user logged in
+
+```
+docker run -d \
+    --name asgard-mysql \
+    --network asgard \
+    -e MYSQL_ROOT_PASSWORD="OuPfme45oAM6m6S8lqy4PQfxlYFlCnmPzyaloZ5Zw=" \
+    -v /home/cs_jpowe007/mysql:/var/lib/mysql \
+    -p 3306:3306 \
+    mysql
+```
+
+Step 3: Run command to build phpmyadmin container
+		- This is the database front end, accessible to the web by http://yourhost/phpmyadmin
+		- Replace the network name from step 1
+
+```
+docker run -d \
+    --name asgard-phpmyadmin \
+    --network asgard \
+    -e PMA_HOST=asgard-mysql \
+    -p 8080:80 \
+    phpmyadmin/phpmyadmin
+```

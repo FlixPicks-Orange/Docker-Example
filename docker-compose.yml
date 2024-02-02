@@ -1,0 +1,12 @@
+version: "3.8"
+services: 
+    web:
+        build: ./front
+        ports:
+            - 80:2000
+        environment:
+            DB_URL: http://api:3000/api
+    api:
+        build: ./database
+        ports:
+            - 3000:3000

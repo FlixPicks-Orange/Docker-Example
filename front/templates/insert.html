@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Testing Front End</title>
+</head>
+<body>
+    <h1>Add New Person</h1>
+    <p>Use the link below to see the people</p>
+    <form method="POST" action="">
+        {{ form.fname }} <br>
+        {{ form.lname }} <br>
+        {{ form.submit }}
+    </form>
+    <a href="{{url_for('showPeople')}}">Show Me People</a><br>
+    <a href="{{url_for('home')}}"> Back to Home Page </a><br>
+</body>
+</html>
