@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Testing Front End</title>
+</head>
+<body>
+    <h1>The Movies</h1>
+    <ul>
+        {% for person in people %}
+        <li>{{ person.fname }} {{ person.lname }}</li>
+        {% endfor %}
+    </ul>
+    <a href="{{url_for('home')}}"> Back to Home Page </a><br>
+</body>
+</html>
